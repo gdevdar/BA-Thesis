@@ -6,13 +6,17 @@
 # Setting up
 - Download scraper_2.0 folder
 - Open the folder within your IDE, or navigate to it with your terminal
+- Create virtual Environment using:
+  - "python -m venv .venv"
 - Activate the virtual environment using one of these three commands
   - Git Bash: "source .venv/scripts/activate"
   - CMD: ".venv\Scripts\activate"
   - PowerShell: ".venv\Scripts\Activate.ps1"
+- Install the required packages using:
+  - "pip install -r requirements.txt"
 - You need two terminals.
   - First, In one terminal you should run this command: "java -jar selenium-server-4.30.0.jar standalone"
-  - Next you can run the scraper using: "py scraper_2.0"
+  - Next you can run the scraper using: "py scraper_2.0.py"
 - Answer the 5 questions in terminal:
   - How many pages do you want to scrape?
   - How many selenium sessions do you want to run?
