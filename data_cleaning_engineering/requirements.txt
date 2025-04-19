@@ -1,0 +1,6 @@
+pandas
+numpy
+requests
+Pillow
+imagehash
+tqdm

@@ -77,8 +77,8 @@ def drop_useless(df):
     price_cols = [
         "price_1_price_total",
         "price_1_price_square",
-        # "price_2_price_total", Not dropping this, making this the target variable
-        "price_2_price_square",
+        #"price_2_price_total", #Not dropping this, making this the target variable
+        # "price_2_price_square",
         "price_3_price_total",
         "price_3_price_square",
         "total_price"
@@ -112,7 +112,7 @@ def drop_useless(df):
         "apothecary_lng",
         # We should create the distance from metro ourselves as well
         "metro_station", # We want to engineer such variables ourselves
-        "metro_station_id",
+        #"metro_station_id",
 
         "uuid", # Same as id but less useful
         "project_uuid", # Same as project_id which I turn into has_project id
@@ -181,7 +181,7 @@ def fill_na(df):
         ],
         default =  '-1'
     )
-    df = df.drop(['rs_code','project_id','rent_period'], axis = 1)
+    #df = df.drop(['rs_code','project_id','rent_period'], axis = 1)
     return df
 
 def engineer(df, reference_date):
@@ -215,7 +215,11 @@ def engineer(df, reference_date):
     return df
 
 def full_transform(df, reference_date):
-    return engineer(fill_na(drop_useless(clean(df))),reference_date)
+    return engineer(
+        #fill_na(
+            drop_useless(clean(df))
+        #)
+        ,reference_date)
 
 from numpy import select
 from pandas import to_datetime

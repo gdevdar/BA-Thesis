@@ -304,8 +304,8 @@ Be careful with using price and price per square meter in the same model, becaus
 "airbnb_link": Link to airbnb account. Very few have it  
 "booking_link": Link to booking account. Very few have it  
 "uuid": Another ID, seems useless on the surface  
-"project_id": Small number have a project_id. Having a project_id itself could be a variable.
-"project_uuid": Small number have a project_uuid. Having project_uidd itself could be a variable.
+"project_id": Small number have a project_id. Having a project_id itself could be a variable.  
+"project_uuid": Small number have a project_uuid. Having project_uidd itself could be a variable.  
 "comment": The description of the apartment. Potentially contains extra info.  
 "map_static_image": A 2D map image, maybe could locate nearby establishments  
 "all_nearby_places_image": A 2D map image, maybe could locate nearby establishments  

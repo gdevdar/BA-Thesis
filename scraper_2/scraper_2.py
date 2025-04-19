@@ -86,7 +86,7 @@ def stage_3():
     return formatted_time
 
 
-def main():
+def scraper_2():
     num_pages = scraper_parameter_prompt("How many pages do you want to scrape?\n(I do 4050)")
     num_selenium = scraper_parameter_prompt("How many selenium sessions do you want to run?\n(I use 2)")
     num_batches = num_selenium * scraper_parameter_prompt("How many batches do you want per selenium session?\n(I use 4)")
@@ -100,6 +100,8 @@ def main():
     time_3 = stage_3()
     print(f"Phase one took {time_1}, phase two took {time_2}, and phase three took {time_3}")
 
+def main():
+    scraper_2()
 
 import link_gather as lg
 from split import split
