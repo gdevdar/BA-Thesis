@@ -2,7 +2,7 @@ import pandas as pd
 from imagehash import hex_to_hash
 import statistics
 from clean_data import clean
-from clean_data import fill_na
+from na_fix import fill_na
 
 import requests
 from PIL import Image

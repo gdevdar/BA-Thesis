@@ -146,7 +146,7 @@ in the website's listing data. Otherwise, it takes value False.
 When such a variable only takes 1 value (False), it usually means that this parameter is not present in any of the apartments.
 
 "data_update_count": Only takes 1 value  
-"city_id" and "city_name": Only takes 1 value (Because we are scraping only Tbilisi)
+"city_id" and "city_name": Only takes 1 value (Because we are scraping only Tbilisi)  
 "published": Only takes 1 value  
 "area_type_id": Only takes 1 value  
 "is_owner": Only takes 1 value  

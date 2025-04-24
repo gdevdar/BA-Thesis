@@ -31,9 +31,12 @@ def drop_useless(df):
     And finally we have decided to not use images for now as they are out of scope for the thesis
     """
     useless_cols = [
+        "appear_rs_code",
+        "rent_period",
         "data_update_count",
         "city_id",
         "city_name",
+        "published",
         "area_type_id",
         "is_owner",
         "is_active",
@@ -120,106 +123,38 @@ def drop_useless(df):
         # The pictures due to being out of scope for us
         "map_static_image",
         "all_nearby_places_image",
-        "images_large",
+        #"images_large",
         "images_blur",
         "images_thumb",
-        "can_exchanged_comment"
+        "can_exchanged_comment",
+        "address",
+        "comment",
+        "point_coordinates",
+        "street_id"
     ]
-    df = df.drop(useless_cols+price_cols+discussed_drop, axis=1)
+
+    duplicate_columns = [
+        "condition_id",
+        "status_id",
+        "bathroom_type_id",
+        "project_type_id",
+        "hot_water_type_id",
+        "heating_type_id",
+        "parking_type_id",
+        "storeroom_type_id",
+        "material_type_id"
+    ]
+    redundant = [
+        'living_room_area',
+        'storeroom_area',
+        'living_room_area',
+        'loggia_area',
+        'porch_area'
+    ]
+    to_drop = useless_cols+price_cols+discussed_drop+duplicate_columns+redundant
+
+    df = df.drop(to_drop, axis=1)
     return df
 
-def fill_na(df):
-    # First let's deal with the numeric ones
-    df['bedroom_type_id'] = df['bedroom_type_id'].fillna(0) # Check
-    df['balconies'] = df['balconies'].fillna(0)
-    df['balcony_area'] = df['balcony_area'].fillna(0)
-    df['living_room_area'] = df['living_room_area'].fillna(0)
-    df['porch_area'] = df['porch_area'].fillna(0)
-    df['loggia_area'] = df['loggia_area'].fillna(0)
-    df['storeroom_area'] = df['storeroom_area'].fillna(0)
-    # Let's deal with the ids now
-    df['condition_id'] = df['condition_id'].fillna(-1) # Maybe 0 is better.
-    df['district_id'] = df['district_id'].fillna(-1)
-    df['urban_id'] = df['urban_id'].fillna(-1)
-    df['hot_water_type_id'] = df['hot_water_type_id'].fillna(-1)
-    df['heating_type_id'] = df['heating_type_id'].fillna(-1)
-    df['parking_type_id'] = df['parking_type_id'].fillna(-1)
-    df['storeroom_type_id'] = df['storeroom_type_id'].fillna(-1)
-    df['material_type_id'] = df['material_type_id'].fillna(-1)
-    df['project_type_id'] = df['project_type_id'].fillna(-1)
-    df['bathroom_type_id'] = df['bathroom_type_id'].fillna(-1)
-    # Let's deal with text ones
-    df['district_name'] = df['district_name'].fillna("-1")
-    df['urban_name'] = df['urban_name'].fillna("-1")
-    df['bathroom_type'] = df['bathroom_type'].fillna("-1")
-    df['project_type'] = df['project_type'].fillna("-1")
-    df['heating_type'] = df['heating_type'].fillna("-1")
-    df['parking_type'] = df['parking_type'].fillna("-1")
-    df['storeroom_type'] = df['storeroom_type'].fillna("-1")
-    df['material_type'] = df['material_type'].fillna("-1")
-    df['address'] = df['address'].fillna("-1")
-    df['comment'] = df['comment'].fillna("-1")
-    df['swimming_pool_type'] = df['swimming_pool_type'].fillna("-1")
-    df['hot_water_type'] = df['hot_water_type'].fillna("-1")
-    df['condition'] = df['condition'].fillna("-1")
-    df['living_room_type'] = df['living_room_type'].fillna("-1")
-    df['build_year'] = df['build_year'].fillna("-1")
-    df['user_type'] = df['user_type'].fillna("-1")
-    # Now unique cases
-    df['has_project_id'] = df['project_id'].notna()
-    df['has_rs_code'] = df['rs_code'].notna()
-    df['rent_period_category'] = select( # Contact myhome.ge to figure out.
-        [
-            df['rent_period'].isna(),
-            df['rent_period'] <50,
-            df['rent_period'] >= 50
-        ],
-        [
-            "-1",
-            "low_rent_period",
-            "high_rent_period"
-        ],
-        default =  '-1'
-    )
-    #df = df.drop(['rs_code','project_id','rent_period'], axis = 1)
-    return df
-
-def engineer(df, reference_date):
-    """
-    user_id_count this shows basically how many apartments the user selling this house is selling at present.
-    Will help us distinguish between big sellers and smaller sellers.
-
-    """
-    # lat lng
-    # comment
-    # address
-    # street_id
-    # point_coordinates
-
-    # Creating variable for user_id_count
-    # Basically lets us see whether the user is a big seller or not
-    df['user_id_count'] = df['user_id'].map(df['user_id'].value_counts())
-
-    # Dealing with date based variables
-    reference_date = to_datetime(reference_date)
-    # Creating created x days ago variable
-    df['created_at'] = to_datetime(df['created_at'])
-    df['created_days_ago'] = (reference_date - df['created_at']).dt.days + 1
-    # Creating updated x days ago variable
-    df['last_updated'] = to_datetime(df['last_updated'])
-    df['updated_days_ago'] = (reference_date - df['last_updated']).dt.days + 1
-
-
-    # Dropping the variables used
-    df = df.drop(['user_id','created_at', 'last_updated'], axis=1)
-    return df
-
-def full_transform(df, reference_date):
-    return engineer(
-        #fill_na(
-            drop_useless(clean(df))
-        #)
-        ,reference_date)
 
 from numpy import select
-from pandas import to_datetime
