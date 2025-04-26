@@ -5,7 +5,7 @@ def engineer(df, reference_date):
 
     """
     # Basically lets us see whether the user is a big seller or not
-    df['user_id_count'] = df['user_id'].map(df['user_id'].value_counts())
+    #df['user_id_count'] = df['user_id'].map(df['user_id'].value_counts())
 
     # Dealing with date based variables
     reference_date = to_datetime(reference_date)
