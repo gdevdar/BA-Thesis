@@ -147,9 +147,9 @@ def drop_useless(df):
     redundant = [
         'living_room_area',
         'storeroom_area',
-        'living_room_area',
         'loggia_area',
-        'porch_area'
+        'porch_area',
+        'balcony_area'
     ]
     to_drop = useless_cols+price_cols+discussed_drop+duplicate_columns+redundant
 

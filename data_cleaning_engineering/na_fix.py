@@ -2,7 +2,7 @@ def fill_na(df):
     # First let's deal with the numeric ones
     df['bedroom_type_id'] = df['bedroom_type_id'].fillna(-1) # Check
     df['balconies'] = df['balconies'].fillna(-1)
-    df['balcony_area'] = df['balcony_area'].fillna(-1)
+    #df['balcony_area'] = df['balcony_area'].fillna(-1)
     #df['living_room_area'] = df['living_room_area'].fillna(0)
     #df['porch_area'] = df['porch_area'].fillna(0)
     #df['loggia_area'] = df['loggia_area'].fillna(0)
