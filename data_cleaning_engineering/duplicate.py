@@ -1,7 +1,7 @@
 import pandas as pd
 from imagehash import hex_to_hash
 import statistics
-from clean_data import clean
+import clean_data as cd
 from na_fix import fill_na
 
 import requests
@@ -42,10 +42,11 @@ def get_hashes(links):
 def initialize_df(path):
     tqdm.pandas()
     df = pd.read_json(path)
+    df = cd.clean(df)
     print(df)
-    df = fill_na(clean(df))
+    #df = cd.drop_useless(cd.clean(df))
     #'2025-04-05'
-    cols_to_check = ['lat', 'lng', 'floor', 'total_floors', 'area', 'bedroom_type_id', 'room_type_id']
+    cols_to_check = ['lat', 'lng', 'floor', 'total_floors', 'area', 'room_type_id']
     df = df[df.duplicated(subset=cols_to_check, keep=False)].sort_values(by=cols_to_check)
 
     df_duplicates = df[df.duplicated(subset=cols_to_check, keep=False)].sort_values(by=cols_to_check).copy()
@@ -75,7 +76,7 @@ def generate_hash(path):
     df = initialize_df(path)
     print(df)
     df = parallel_hash(df,num_workers = 8)
-    df.to_json("for_duplicate/image_hash_v1.json", orient="records", indent=2)
+    df.to_json("for_duplicate/image_hash.json", orient="records", indent=2)
 
 # ---------------------------------------------------------------------------------------------
 # stage 2
@@ -98,7 +99,7 @@ def hash_distance(list1, list2):
 
 def check_duplicate():
     # Import the data
-    hash_df = pd.read_json('for_duplicate/image_hash_v1.json')
+    hash_df = pd.read_json('for_duplicate/image_hash.json')
     # Calculating the number of clusters for the for loop
     num_clusters = hash_df['duplicate_group_id'].max()
     # Creating the new column which will give us info about the duplicates
@@ -125,7 +126,7 @@ def check_duplicate():
             index += 1
         duplicate_index += 1
     df_duplicates = hash_df[['id','true_duplicate_id']]
-    df_duplicates.to_json("for_duplicate/true_duplicates_v1.json")
+    df_duplicates.to_json("for_duplicate/true_duplicates.json")
 
 # ---------------------------------------------------------------------------------------------
 # stage 3
@@ -144,11 +145,26 @@ def na_to_unique(df):
     return df
 
 def deal_with_duplicate(path):
-    true_duplicates = pd.read_json('for_duplicate/true_duplicates_v1.json')
+    true_duplicates = pd.read_json('for_duplicate/true_duplicates.json')
     main_df = pd.read_json(path)
+    main_df = cd.clean(main_df)
+    main_df = cd.drop_useless(main_df)
+    main_df['completeness'] = main_df.notna().sum(axis=1)
+    main_df['created_date'] = pd.to_datetime(main_df['created_at'])
+
     df = left_join(main_df,true_duplicates)
     df = na_to_unique(df)
-    df = df.drop_duplicates(subset='true_duplicate_id', keep='first')
+
+    df_sorted = df.sort_values(
+        by=['true_duplicate_id', 'completeness', 'created_date'],
+        ascending=[True, False, True]
+    )
+    df = df_sorted.drop_duplicates(
+        subset='true_duplicate_id',
+        keep='first'
+    ).reset_index(drop=True)
+    df = df.drop(columns=['completeness','images_large'])
+    #df = df.drop_duplicates(subset='true_duplicate_id', keep='first')
     return df
 
 # ---------------------------------------------------------------------------------------------
@@ -158,7 +174,7 @@ def full_procedure(path):
     generate_hash(path)
     check_duplicate()
     df = deal_with_duplicate(path)
-    df.to_json("for_duplicate/duplicate_free_v1.json")
+    df.to_json("for_duplicate/duplicate_free.json")
 def main():
     # full_procedure('05_04_2025.json','2025-04-05')
     full_procedure('2025-04-19.json')
