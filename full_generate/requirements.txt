@@ -1,0 +1,10 @@
+selenium
+bs4
+cloudscraper
+pandas
+numpy
+requests
+Pillow
+imagehash
+tqdm
+scikit-learn
