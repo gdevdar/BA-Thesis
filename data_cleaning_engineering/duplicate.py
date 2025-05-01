@@ -116,7 +116,7 @@ def check_duplicate():
                 # Compare to previous i observations starting from the first
                 for j in range(i):
                     distance = hash_distance(hash_df.loc[index,'hash_list'],hash_df.loc[index-i+j,'hash_list'])
-                    if distance < 5:
+                    if distance < 10:
                         hash_df.loc[index, 'true_duplicate_id'] = hash_df.loc[index-i+j,'true_duplicate_id']
                         dupe = True
                         break
@@ -163,7 +163,7 @@ def deal_with_duplicate(path):
         subset='true_duplicate_id',
         keep='first'
     ).reset_index(drop=True)
-    df = df.drop(columns=['completeness','images_large'])
+    df = df.drop(columns=['completeness','images_large','true_duplicate_id','created_date'])
     #df = df.drop_duplicates(subset='true_duplicate_id', keep='first')
     return df
 
