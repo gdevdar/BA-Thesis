@@ -1,147 +1,156 @@
-### clean_data.py
-```python
-import importlib
-import pandas as pd
-import clean_data as dc
-importlib.reload(dc) # You will need to install this package
+# Cleaning & Engineering
+The scripts here reflect the procedures me 
+([@gdevdar](https://github.com/gdevdar)) and 
+[@MalkhazBirtvelishvili](https://github.com/MalkhazBirtvelishvili) 
+decided to employ to prepare our dataset for modeling 
+purposes.
 
-# Example of usage
-df = pd.read_json("05_04_2025.json")
-df = dc.full_transform(df, reference_date = '2025-04-05')
+## How to run
+### Requirements
+- You need the .json data file that results from running our [Scraper](https://github.com/gdevdar/BA-Thesis/tree/main/scraper_2). You can download a sample dataset [here](https://drive.google.com/drive/folders/1jynW33dtleAp4EEcYoQLCxGC5BzM70UE?usp=sharing) to test out the code.
+- You need [python](https://www.python.org/downloads/) installed. I use python 3.12, although python 3.13 should work just fine as well 
+### Instructions
+- You either need to download "data_cleaning_engineering" folder, or clone the whole repository
+- Then place in the "data_cleaning_engineering" folder the .json data file that we mentioned as the first requirement
+- Then Open the folder using your IDE and open terminal. or open cmd and navigate to the folder
+- It may be wise to create a virtual environment first using:
+```bash
+python -m venv .venv
 ```
+- And then activating the environment using one of the three alternatives
 
-# How to apply all the procedures
+1. Git Bash
+```bash
+source .venv/scripts/activate
+```
+2. cmd
+```cmd
+.venv\Scripts\activate
+```
+3. PowerShell
+```powershell
+.venv\Scripts\Activate.ps1
+```
+- Run the following in the terminal:
+```bash
+pip install -r requirements.txt
+```
+- Then run the following in the terminal:
+```bash
+py procedure.py
+```
+- When it asks the name of the data file, simply input the name. (For example if you are using the sample dataset input: 2025-04-27.json)
+- When it asks you the reference that, you should give it the date at which the data was scraped. The format is as such YYYY-MM-DD. (For example if you are using the sample dataset input 2025-04-27)
+- Enjoy the show!!!
 
+# Procedure breakdown
+procedure.py runs functions from the following python files or codes sequentially in this order:
+1. clean from clean_data.py
+2. coordinate_fix.py
+3. mistakes.py
+4. urban_fix.py
+5. duplicate_v2.py
+6. drop_useless from clean_data.py
+7. na_fix.py
+8. location.py
+9. engineer.py
 
-# Initial Cleaning (dropping observations and columns)
+## clean_data.py
+This file has to functions called 1. clean() and 2. drop_useless(). clean() removes observations
+that are not apartment sales and somehow ended up in our data. drop_useless() is used to drop features that
+were deemed to be unusable or unnecessary for our purpose.
+## coordinate_fix.py
+The coordinates were messed up in the data.
 
-# Removing Duplicates
-There are two sources for duplicates. First one 
-emerges due  to the nature of our scraper.
-The second one is due to one user or multiple users
-posting the same apartment for sale many times.
+First latitude and longitude were reversed for most and normal for a few.
 
-Dealing with the first problem is trivial. 
-Every statement has a unique ID. And simply removing
-duplicates in terms of that ID solves the 
-first problem entirely.
+There were coordinates that were outside of Tbilisi.
 
-The second problem is much more tricky. 
-There are two main problems: 1. It is possible for 
-almost identical apartments to be sold 
-at the same time (e.g. two apartments on the 
-same floor, constructed in the same manner.) 2. 
-The duplicate  statements don't necessarily have 
-identical values for every feature. 
-(e.g. one of the apartments may be missing some 
-features. So instead of True there could be False,
-or instead of some value there could be NAs)
+This code fixes the coordinates and drops the observations that are outside of Tbilisi.
 
-The main challenge is differentiating whether 
-the apartments have similar features because 
-they are duplicates or because they are simply similar.
+## urban_fix.py
+Here we map urban_ids and urban_names to a new feature called 'urban'. We took the smaller administrative
+units and combined them into bigger ones.
 
-First we pick variables that are almost 
-guaranteed to be the same across duplicated statements
-these are: 'lat', 'lng', 'floor', 'total_floors', 'area', 'bedroom_type_id', 'room_type_id'.
+Additionally, the observations that were missing urban data were dropped.
 
-After finding duplicates with these features. Give each
-set of duplicates an ID. For example, ID = 1 will contain
-the first set of duplicates, meaning they all have the same values
-for the above-mentioned features. However, it is too soon
-to claim them to be duplicates. To separate duplicates 
-and simply similar apartments we relied on their images.
+## duplicate_v2.py
+The script itself can be divided into three parts or stages which are further explained below
+### Why not a simple drop_duplicates()?
+We are dealing with two types of duplicates: 1) Generated from the 
+scraper fetching the same url twice 2) Different statements about 
+the same apartment. Problem number one is straightforward to solve. 
+In the case of the second problem Either an agent posts
+the same sale many times to catch people's eyes, or an agent copies 
+someone's statement reach a deal with the buyer instead
+of the original seller for profit.
 
-We have noticed that duplicate statements have identical images.
-So we wrote an algorithm that fetches their images, 
-converts them into hashes. Then measures the distance 
-between the image hashes. If the images are too similar
-then they are considered to be duplicates, if they are not
-then they are deemed as separate statements.
+Such duplicates characteristically are not identical. They sometimes have
+less or more parameters, depending on what the agent was feeling at the time.
 
-This way we removed around 45% of our dataset.
-# Inconsistent Values
-## Inconsistency in the target variable
+However, there are a few variables that are consistently present, such as: 'lat', 'lng', 'floor', 'total_floors', 'area', 'room_type_id'.
+So would the solution be to drop all the observations duplicated by these variables?
 
-## Inconsistency in the coordinates
-Inconsistency in the coordinates is dealt with using coordinate_fix.py.
-Most of the coordinates in the data is reversed. latitude
-is in the longitude column and vice versa.
+In a sense yes. Dropping this way is the safest method to ensure that all or most of the duplicates are removed
+from the data. However, this method also removes statements that are not duplicates.
+To avoid unnecessarily dropping data I have implemented duplicate_v2.py.
 
-First step to fixing is reversing latitude and longitude.
-However, there are a few observations which didn't need reversing.
-Then some observations still end up outside Tbilisi's coordinates.
-Those that end up outside are either wrong coordinates, or some of them didn't need reversing.
-We reverse the coordinates of those observations that are outside of Tbilisi.
-And finally if after that reversion the coordinates of some observations are outside of Tbilisi.
-Then those observations are dropped from the data.
-## Inconsistency in balconies
+### What does duplicate_v2.py do?
+First it solves problem number one, dropping the same statements.
 
+Then using these variables: 'lat', 'lng', 'floor', 'total_floors', 'area', 'room_type_id', it separates out the observations
+that are duplicates based on these variables. Each duplicate group is assigned their own 'duplicate_group_id'.
 
-# Missing Values
-'condition_id' and 'condition'. They have missing values as the publisher of the statement
-didn't provide the information. (After accounting for duplicates around 10% of the dataset has this problem).
-This is too important of a variable to drop, therefore not having condition specified will be a separate input
-into the model.
+Then within groups we compare pictures of the observations to each other.
+For example a duplicate group that has 5 observations (They simply have the same values for
+the features mentioned above). The first observation will be assigned its own unique id.
+Then the second observation images are compared to the first one's. If the at least one image is the same
+then the second observation takes the same id as the first observation. If they are not the same
+second observation gets a unique id. Then the third observation is first compared to the first observation.
+If they are the same it gets the id of the first observation, if not then it is compared to the second observation.
+Same logic if same it gets the id of the second observation and if not it will get a unique id.
+And so on with the fourth and fifth observations. Once all the observations in this groups are compared 
+and give ids then the algorithm moves to another group of duplicates and does the same.
 
-'district_id' and 'district_name'. Somehow there's 1 missing for district_id while 87 for district name (in my current dataset). 
-MyHome.ge automatically fills in this kind of data after giving it the address, therefore this
-is an error on their part.  
-To tackle the issue we simply use the district_name and district_id
-of the nearest apartment (based on coordinates) to fill out the missing values.
+### How does the comparison work?
 
-'urban_id' and 'urban_name'. Exactly same issue as district_id and district_name.
-This also means they have the exact same solution.
+We have a feature called 'images_large' and it contains urls to images for that statement.
+First we have a function that collects images using these links. 
+Then to compare the images we have two methods.
+#### Method 1
+After collecting images we create hashes of the images. Then we calculate
+the hash distance between the hashes of the observations we are comparing.
+And based on the lowest distance between the hashes we decide whether the observations are duplicate or not.
+#### Method 2
+If method 1 claims that the observations are duplicates then method 2 doesn't activate.
+However, if method 1 didn't detect duplicates then method 2 practically double checks its work.
+Method 2 is slower than method 1 but it detects image similarity much better.
 
-'bedroom_type_id', missing value because they didn't provide a number.
-However, when NA, the actual number of bedrooms can be 1,2,3 or any number.
-We will replace NA with -1, and hope that model learns using this information.
+In this case after collecting images, it converts them to grayscale images.
+And then it uses RANSAC homography to count inliers, which I don't fully understand.
+However, this method works better than the first one.
 
-'bathroom_type_id' and 'bathroom_type'. These variables are NA because the user didn't specify them.
-NA doesn't mean that the apartment doesn't have a bathroom. Instead, we will give value -1 and
-let the model learn the relationship.
+#### parallel comparisons
+The dataframe before conducting comparisons is divided into batches in such a manner
+that the observations in a duplicate group end up in the same batch.
+And then the comparisons happen with method 1 and method 2 in parallel to save time.
 
-'project_type_id'. This is NA when the user didn't input it.
-We will assign -1 to capture some information.
+## na_fix.py
+Simple function that replaces NAs with -1
+## location.py
+This was one of the major breakthroughs for this project.
 
-'project_id'. This is mostly NA, and I think we shouldn't use it.
+It relies on the files generated by codes in the 'for_location' folder.
+These codes are bus_stops.py, gyms.py, kindergarden.py, metro.py, parks.py, pharmacy.py, school.py,
+school_clean.py and supermarket.py.
 
-'hot_water_type_id' and 'hot_water_type'. When NA I will give it 0 or -1.
+These codes basically generate coordinates for the respective establishments for Tbilisi.
 
-'heating_type_id' and 'heating_type'. When NA I will give it 0 or -1.
-
-'parking_type_id' and 'parking_type'. Half of observations are NA. Parking types are many.
-We think it's better to create a simpler variable called "has_parking"
-
-'balconies' and 'balcony_area'. Even though it's NA half the time.
-Most of the NAs have balconies. We will replace NA with -1.
-
-'storeroom_type_id' and 'storeroom_type'. Very few are not NA.
-Using many categories for something that only a few have doesn't sound optimal.
-Therefore, it is better to have a "has_storeroom" variable instead.
-
-'material_type_id' and 'material_type'. Replace Nans with -1.
-
-'storeroom_area' mostly NA. I think should be dropped.
-
-'swimming_pool_type'. We already have has swimming pool variable. Differentiating between types is not needed.
-
-'living_room_type'. Mostly NA, and we don't think it is that useful.
-
-'build_year'. Mostly NA as well. NA means that the user didn't specify it.
-Plan to replace NA with -1 or 0.
-
-'living_room_area', 'loggia_area', 'porch_area', 'waiting_space_area'. These variables are mostly NA.
-They should either be dropped or replaced with a variable such as has_living_room, has_loggia, has_porch.
-
-
-
-# Engineering Variables
-'urban' - Engineered from 'urban_id' and 'urban_name'.
-If there were missing values for both urban_id and urban_name, we dropped them.
-If the urban was one of these 'კაკლები','კიკეთი','კოჯორი','ოქროყანა',
-'ტაბახმელა','შინდისი','წავკისი','წყნეთი','ზემო ლისი', 'მუხათგვერდი','მუხათწყარო','თხინვალი'.
-Then these observations were dropped.
-Else we clustered the small urbans into bigger urbans, and gave them an English name.
-
-# Resulting Set of Variables
+And the purpose of the location.py is to calculate the distance from an observation in my data
+to the nearest bus_stop, gym, kindergarden etc.
+## engineer.py
+This creates a few new variables from existing ones.
+One is 'created_days_ago' which shows how many days ago the statement was created
+Another is 'updated_days_ago' which shows how many days ago the statement was updated
+There's also 'has_project_id' which shows whether the observation has a 'project_id' or not
+and 'vip' which is True when either of these three is true: is_vip, is_vip_plus and is_super_vip
