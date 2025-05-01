@@ -11,7 +11,7 @@ def clean(df):
 
     df = df.drop(["deal_type_id", "real_estate_type_id", "rent_type_id"], axis = 1)
 
-    df = df.drop_duplicates(subset='id', keep='first')
+    #df = df.drop_duplicates(subset='id', keep='first')
     return df
 
 def drop_useless(df):
@@ -157,4 +157,4 @@ def drop_useless(df):
     return df
 
 
-from numpy import select
+#from numpy import select
