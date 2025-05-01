@@ -72,6 +72,7 @@ def create_location_features(df):
     df = dist_to_places(df, 'for_location/tbilisi_schools.csv', 'nearest_school_dist', df_coords)
     df = dist_to_places(df, 'for_location/tbilisi_supermarkets.csv', 'nearest_supermarket_dist', df_coords)
     df = dist_to_places(df, 'for_location/tbilisi_universities.csv', 'nearest_university_dist', df_coords)
+    df = df.drop(columns=['lat','lng'])
     return df
 
 def main():
