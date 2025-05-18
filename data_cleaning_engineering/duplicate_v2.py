@@ -317,7 +317,9 @@ def remove_duplicates(df):
     ).reset_index(drop=True)
 
     # (Optional) clean up helper columns
-    deduped = deduped.drop(columns=['is_physical', 'has_rs_code'])
+    deduped = deduped.drop(columns=['is_physical', 'has_rs_code','ghost_id','images_large_x'
+        ,'images_large_y','duplicate_group_id','similarity_id','group_uid'
+        ,'completeness'])
     #print(deduped['completeness'].mean())
     #print(deduped.shape[0])
     return deduped
