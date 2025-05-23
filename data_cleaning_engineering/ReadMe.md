@@ -54,6 +54,7 @@ procedure.py runs functions from the following python files or codes sequentiall
 7. na_fix.py
 8. location.py
 9. engineer.py
+10. comments.py
 
 ## clean_data.py
 This file has to functions called 1. clean() and 2. drop_useless(). clean() removes observations
@@ -154,3 +155,8 @@ One is 'created_days_ago' which shows how many days ago the statement was create
 Another is 'updated_days_ago' which shows how many days ago the statement was updated
 There's also 'has_project_id' which shows whether the observation has a 'project_id' or not
 and 'vip' which is True when either of these three is true: is_vip, is_vip_plus and is_super_vip
+
+## comments.py
+Based on a list of words that appear in the comments the function create_comment_cols creates twelve  
+new columns that take values 1 and 0 and are based on whether some words appear or not.  
+The code is quite simple and for more details you can view comments.py itself.

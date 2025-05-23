@@ -21,6 +21,7 @@ def procedure(path,reference_date):
     df = fill_na(df) # Replaces NAs with -1
     df = create_location_features(df)
     df = engineer(df,reference_date = reference_date)
+    df = create_comment_cols(df)
 
     #dup.full_procedure(path)
     #df = read_json("for_duplicate/duplicate_free.json")
@@ -56,6 +57,7 @@ import duplicate_v2 as dup
 from location import create_location_features
 from engineer import engineer
 from mistakes import clean_mistakes
+from comments import create_comment_cols
 
 if __name__ == "__main__":
     main()
