@@ -1,11 +1,45 @@
 # Project Overview
+The idea of the project is to create tools that allow us 
+([@gdevdar](https://github.com/gdevdar) and [@MalkhazBirtvelishvili](https://github.com/MalkhazBirtvelishvili))
+ to generate useable data from myhome.ge.
+ ## Aims
+ We want to build a predictive model for estimating apartment prices, which will be built into a website for people to use.
+This project that gathers, cleans and engineers the data is the first step towards that goal.
 
+Additionally, I am creating tools that can be used by other researchers
+to generate apartment data.
+
+Finally, this is to expand the horizons of economists, my professors or even my peers.
+I want to show people that much more data is at our fingertips (through scraping) 
+than we initially realize. Additionally, by being smart about gathering data and feature
+engineering it is possible to create great features that were previously unavailable.
 
 ## Table of Contents
 - [Requirements](#requirements)
 - [Setting up](#setting-up)
-    - [Scraper Specific](#scraper-specific)
-
+- [Running the script](#running-the-script)
+- [Scraping Documentation](#scraping-documentation)
+	- [The Scraper](#the-scraper)
+		- [Parameter Choosing Phase](#parameter-choosing-phase)
+		- [Phase One](#phase-one)
+		- [Phase Two](#phase-two)
+		- [Phase Three](#phase-three)
+	- [The Resulting Dataset](#the-resulting-dataset)
+		- [Useless Variables](#useless-variables)
+		- [Variables with Potential](#variables-with-potential)
+		- [Target Variable(s)](#target-variables)
+		- [Trickier variables](#trickier-variables)
+- [Data Cleaning and Engineering Documentation](#data-cleaning-and-engineering-documentation)
+	- [Procedure breakdown](#procedure-breakdown)
+		- [clean_data.py](#clean_datapy)
+		- [coordinate_fix.py](#coordinate_fixpy)
+		- [urban_fix.py](#urban_fixpy)
+		- [duplicate_v2.py](#duplicate_v2py)
+		- [na_fix.py](#na_fixpy)
+		- [urban_clean_up.py](#urban_clean_uppy)
+		- [location.py](#locationpy)
+		- [engineer.py](#engineerpy)
+		- [comments.py](#commentspy)
 # Requirements
 - Java 11 or higher needs to be installed (I downloaded from this [link](https://www.oracle.com/java/technologies/downloads/#jdk24-windows), the x64 installer one)
 - Google Chrome browser needs to be installed
