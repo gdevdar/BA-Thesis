@@ -1,0 +1,14 @@
+# Scraper
+selenium==4.33.0
+beautifulsoup4==4.13.4
+cloudscraper>=1.2.71
+# Data cleaning and engineering
+pandas==2.3.0
+numpy==2.3.0
+requests==2.32.3
+Pillow==11.2.1
+imagehash==4.3.2
+tqdm==4.67.1
+opencv-python==4.11.0.86
+scikit-learn==1.7.0
+osmnx == 2.0.3

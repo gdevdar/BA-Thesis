@@ -15,5 +15,5 @@ def map_grab():
     filter_parameters = json_data["props"]['pageProps']['_nextI18Next']['initialI18nStore']['ka']['filter-parameters']
     dumps = json.dumps(filter_parameters, indent=4)
 
-    with open('mapping.json', 'w') as f:
+    with open('scrape_files/mapping.json', 'w') as f:
         f.write(dumps)

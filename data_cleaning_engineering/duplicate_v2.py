@@ -227,7 +227,7 @@ def batch_similarity(batch_df):
 
 # -----------------------------------------------------------------------------------------------
 # Parallelizing the process
-def batch_generate(df, num_of_batches = 16):
+def batch_generate(df, num_of_batches):
     num_clusters = int(df['duplicate_group_id'].max())
     step = num_clusters // num_of_batches
     boundaries = [round(step * i) for i in range(num_of_batches + 1)]
@@ -239,8 +239,8 @@ def batch_generate(df, num_of_batches = 16):
         batch_list.append(df_batch.copy())
     return batch_list
 
-def parallel_similarity(df):
-    batch_list = batch_generate(df)
+def parallel_similarity(df,num_of_batches = 16):
+    batch_list = batch_generate(df,num_of_batches)
     workers = 8
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         results = list(executor.map(batch_similarity , batch_list))
@@ -327,9 +327,13 @@ def remove_duplicates(df):
 def deduplicate(df):
     df = initial_duplicates(df)
     df_duplicate = potential_duplicates(df)
-    df_duplicate = parallel_similarity(df_duplicate)
-    df = apply_duplicates(df, df_duplicate)
-    df = remove_duplicates(df)
+    size_of_duplicates = df_duplicate.shape[0]
+    if size_of_duplicates > 0:
+        from math import ceil
+        num_of_batches = min(ceil(size_of_duplicates/10),16)
+        df_duplicate = parallel_similarity(df_duplicate,num_of_batches)
+        df = apply_duplicates(df, df_duplicate)
+        df = remove_duplicates(df)
     return df
 
 def main():

@@ -17,8 +17,11 @@ def procedure(path,reference_date):
     df = clean_mistakes(df)
     df = urban_fix(df)
     df = dup.deduplicate(df)
+    #df = df.drop_duplicates(subset = 'id')
+    df = df.drop(['images_large'], axis=1)
     df = drop_useless(df)
     df = fill_na(df) # Replaces NAs with -1
+    df = location_clean_up(df)
     df = create_location_features(df)
     df = engineer(df,reference_date = reference_date)
     df = create_comment_cols(df)
@@ -48,16 +51,17 @@ def main():
     print(df.shape[0])
 
 from pandas import read_json
-from clean_data import clean
-from clean_data import drop_useless
-from coordinate_fix import coordinate_fix
-from urban_fix import urban_fix
-from na_fix import fill_na
-import duplicate_v2 as dup
-from location import create_location_features
-from engineer import engineer
-from mistakes import clean_mistakes
-from comments import create_comment_cols
+from data_cleaning_engineering.clean_data import clean
+from data_cleaning_engineering.clean_data import drop_useless
+from data_cleaning_engineering.coordinate_fix import coordinate_fix
+from data_cleaning_engineering.urban_fix import urban_fix
+from data_cleaning_engineering.na_fix import fill_na
+from data_cleaning_engineering import duplicate_v2 as dup
+from data_cleaning_engineering.location import create_location_features
+from data_cleaning_engineering.engineer import engineer
+from data_cleaning_engineering.mistakes import clean_mistakes
+from data_cleaning_engineering.comments import create_comment_cols
+from data_cleaning_engineering.urban_clean_up import location_clean_up
 
 if __name__ == "__main__":
     main()

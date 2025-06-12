@@ -80,8 +80,8 @@ def drop_useless(df):
     price_cols = [
         "price_1_price_total",
         "price_1_price_square",
-        #"price_2_price_total", #Not dropping this, making this the target variable
-        # "price_2_price_square",
+        "price_2_price_total", 
+        # "price_2_price_square", #Not dropping this, making this the target variable
         "price_3_price_total",
         "price_3_price_square",
         "total_price"
@@ -128,7 +128,7 @@ def drop_useless(df):
         "images_thumb",
         "can_exchanged_comment",
         "address",
-        "comment",
+        #"comment",
         "point_coordinates",
         "street_id"
     ]

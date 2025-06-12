@@ -13,7 +13,7 @@ def scraper_parameter_prompt(case):
 
 def write_links(results):
     count = 0
-    file = open('links.txt', 'w')
+    file = open('scrape_files/links.txt', 'w')
     for item in results:
         for elements in item:
             count+=1
@@ -51,12 +51,12 @@ def write_json(results):
             combined_data.append(elements)
     #print(f"Successfully scraped {count} links")
     combined_json = json.dumps(combined_data, indent=4)
-    with open(f'raw.json', 'w') as f:
+    with open(f'scrape_files/raw.json', 'w') as f:
         f.write(combined_json)
     return count
 def stage_2(num_workers,batch_per_worker):
     start_time = time.time()
-    urls = ls.read_lines("links.txt")
+    urls = ls.read_lines("scrape_files/links.txt")
     batches = list(split(urls, num_workers * batch_per_worker))
     results = ls.parallel_data_collector(batches, num_workers)
     count = write_json(results)
@@ -67,18 +67,18 @@ def stage_2(num_workers,batch_per_worker):
     print(f"Successfully scraped {count} links in {formatted_time}")
     return formatted_time
 
-def stage_3():
+def stage_3(date_today):
     start_time = time.time()
     map_grab()
-    data = de.data_load("raw.json")
-    mapping = de.data_load("mapping.json")
+    data = de.data_load("scrape_files/raw.json")
+    mapping = de.data_load("scrape_files/mapping.json")
     dataset = []
     for item in data:
         row = de.row_creator(item,mapping)
         dataset.append(row)
 
     dataset_dumps = json.dumps(dataset, indent = 4)
-    with open(f"{date.today()}.json", "w") as f:
+    with open(f"scrape_files/{date_today}.json", "w") as f:
         f.write(dataset_dumps)
     end_time = time.time()
     execution_time = end_time - start_time
@@ -86,7 +86,7 @@ def stage_3():
     return formatted_time
 
 
-def scraper_2():
+def scraper_2(date_today):
     num_pages = scraper_parameter_prompt("How many pages do you want to scrape?\n(I do 4050)")
     num_selenium = scraper_parameter_prompt("How many selenium sessions do you want to run?\n(I use 2)")
     num_batches = num_selenium * scraper_parameter_prompt("How many batches do you want per selenium session?\n(I use 4)")
@@ -97,21 +97,22 @@ def scraper_2():
 
     time_2 = stage_2(num_workers,batch_per_worker)
 
-    time_3 = stage_3()
+    time_3 = stage_3(date_today)
     print(f"Phase one took {time_1}, phase two took {time_2}, and phase three took {time_3}")
 
 def main():
     scraper_2()
 
-import link_gather as lg
-from split import split
+from scraper_2 import link_gather as lg
+from scraper_2.split import split
 import concurrent.futures
-import link_scrape as ls
+from scraper_2  import link_scrape as ls
 import json
 import time
 from datetime import timedelta
 from datetime import date
-import data_extract as de
-from mapping_grab import map_grab
+from scraper_2  import data_extract as de
+from scraper_2.mapping_grab import map_grab
 
-main()
+if __name__ == "__main__":
+    main()

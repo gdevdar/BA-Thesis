@@ -70,6 +70,7 @@ def create_comment_cols(df):
         'word_european'
     ]
     df[col_names] = df['comment'].apply(lambda txt: Series(comment_columns(txt), index=col_names))
+    df.drop(['comment'], axis = 1, inplace=True)
     return df
 
 def main():
