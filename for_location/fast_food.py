@@ -2,21 +2,26 @@ import time
 import math
 import requests
 from collections import deque
+import pandas as pd
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
 
-API_KEY        = "API_KEY"
-SW_LAT, SW_LNG = 41.6100, 44.7000  # Southwest corner of Tbilisi
-NE_LAT, NE_LNG = 41.8400, 44.9500  # Northeast corner of Tbilisi
+API_KEY        = "API_KEY"  # Replace with your real API key
+SW_LAT, SW_LNG = 41.6100, 44.7000
+NE_LAT, NE_LNG = 41.8400, 44.9500
 
-INITIAL_RADIUS = 1000    # meters
-MIN_RADIUS     = 200     # meters
-PLACE_TYPE     = "atm"   # collect ATMs
+INITIAL_RADIUS = 1000
+MIN_RADIUS     = 200
+PLACE_TYPE     = "restaurant"
 
-# ── GRID SETUP ──────────────────────────────────────────────────────────────────
+KEYWORDS = [
+    "fast food", "burger", "pizza", "kfc", "mcdonald", "wendy's", "domino's",
+    "shawarma", "subway", "french fries", "hamburger", "hot dog", "fried chicken"
+]
+
+# ── GRID ────────────────────────────────────────────────────────────────────────
 
 def generate_grid(sw_lat, sw_lng, ne_lat, ne_lng, radius):
-    """Generate grid points with radius to cover entire Tbilisi area."""
     lat_step = (radius * 2) / 111000.0
     grid = []
     lat = sw_lat
@@ -30,7 +35,6 @@ def generate_grid(sw_lat, sw_lng, ne_lat, ne_lng, radius):
     return grid
 
 def subdivide(lat, lng, radius):
-    """Divide a search region into 4 smaller parts for higher resolution."""
     new_radius = radius / 2.0
     dlat = new_radius / 111000.0
     dlng = new_radius / (111000.0 * math.cos(math.radians(lat)))
@@ -43,14 +47,14 @@ def subdivide(lat, lng, radius):
 
 # ── GOOGLE NEARBY SEARCH ───────────────────────────────────────────────────────
 
-def search_atms(lat, lng, radius):
-    """Perform a Nearby Search for ATMs around (lat, lng)."""
+def search_places(lat, lng, radius, keyword):
     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     params = {
         "key": API_KEY,
         "location": f"{lat},{lng}",
         "radius": radius,
-        "type": PLACE_TYPE
+        "type": PLACE_TYPE,
+        "keyword": keyword
     }
     results = []
     while True:
@@ -59,23 +63,20 @@ def search_atms(lat, lng, radius):
         token = resp.get("next_page_token")
         if not token:
             break
-        # next_page_token may take a couple seconds to activate
         time.sleep(2)
         params = {"key": API_KEY, "pagetoken": token}
     return results
 
-# ── MAIN DATA COLLECTION ───────────────────────────────────────────────────────
+# ── COLLECTION PER KEYWORD ─────────────────────────────────────────────────────
 
-def collect_atms():
-    seen_ids = set()
-    atms = []
+def collect_fast_food_for_keyword(keyword, seen_ids):
     queue = deque(generate_grid(SW_LAT, SW_LNG, NE_LAT, NE_LNG, INITIAL_RADIUS))
+    places = []
 
     while queue:
         lat, lng, rad = queue.popleft()
-        results = search_atms(lat, lng, rad)
+        results = search_places(lat, lng, rad, keyword)
 
-        # if the area is dense (max 60 results returned) subdivide further
         if len(results) >= 60 and rad > MIN_RADIUS:
             queue.extend(subdivide(lat, lng, rad))
             continue
@@ -85,28 +86,28 @@ def collect_atms():
             if pid in seen_ids:
                 continue
             seen_ids.add(pid)
-
-            types = place.get("types", [])
-            # filter to ensure it's actually an ATM
-            if "atm" not in types:
-                continue
-
             location = place["geometry"]["location"]
-            atms.append({
+            places.append({
                 "place_id": pid,
                 "name": place.get("name", ""),
+                "keyword": keyword,
                 "latitude": location["lat"],
                 "longitude": location["lng"]
             })
+    return places
 
-    return atms
-
-# ── RUN & EXPORT ───────────────────────────────────────────────────────────────
+# ── MAIN LOOP ──────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    atms = collect_atms()
-    print(f"Total ATMs found: {len(atms)}")
+    all_places = []
+    seen_ids = set()
 
-    # Save to CSV
-    import pandas as pd
-    pd.DataFrame(atms).to_csv("tbilisi_atms.csv", index=False)
+    for kw in KEYWORDS:
+        print(f"Collecting for keyword: {kw}")
+        places = collect_fast_food_for_keyword(kw, seen_ids)
+        print(f"  Found {len(places)} new places")
+        all_places.extend(places)
+
+    print(f"✅ Total unique fast food restaurants found: {len(all_places)}")
+    df = pd.DataFrame(all_places)
+    df.to_csv("tbilisi_fast_food_expanded.csv", index=False)

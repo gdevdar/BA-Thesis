@@ -5,7 +5,7 @@ from collections import deque
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
 
-API_KEY        = "API_Key"
+API_KEY        = "API_KEY"
 SW_LAT, SW_LNG = 41.6100, 44.7000   # SW corner of Tbilisi
 NE_LAT, NE_LNG = 41.8400, 44.9500   # NE corner of Tbilisi
 

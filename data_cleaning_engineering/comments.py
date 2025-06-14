@@ -6,7 +6,7 @@
 # "რემონტით"
 # "პრესტიჟული","პრესტიჟულ", "ძვირადღირებული", "პრემიუმ", "უმაღლესი", "უნიკალური", "ულამაზესი","ექსკლუზიური","არაჩვეულებრივი"
 # "გამორჩეული"
-# "კომპლექსში", "კომპლექსია"
+# "კომპლექსში", "კომპლექსია"    
 # "ხედი", "გადაჰყურებს", "ხედით"
 # "იაფად"
 # "ჭკვიანი"
@@ -41,7 +41,8 @@ def comment_columns(comment):
              ["იაფად","იაფი"],
              ["ჭკვიანი"],
              ["მოპირკეთებულია","მოპირკეთებული"],
-             ["ევროპული"]
+             ["ევროპული"],
+             ["ხედი", "გადაჰყურებს", "ხედით"]
             ]
     # Goes through each set of words
     for words in words_list:
@@ -67,7 +68,8 @@ def create_comment_cols(df):
         'word_cheap',
         'word_smart',
         'word_paved',
-        'word_european'
+        'word_european',
+        'word_with_view'
     ]
     df[col_names] = df['comment'].apply(lambda txt: Series(comment_columns(txt), index=col_names))
     df.drop(['comment'], axis = 1, inplace=True)
@@ -89,7 +91,8 @@ def main():
         'word_cheap',
         'word_smart',
         'word_paved',
-        'word_european'
+        'word_european',
+        'word_with_view'
     ]
     counts = {col: df[col].value_counts() for col in col_names}
     value_counts_df = df[col_names] \
